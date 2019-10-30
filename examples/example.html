@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <script min_src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.js"></script>
+    <style>
+      body {
+        font-family: Monospace;
+        background-color: #f0f0f0;
+        margin: 0px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+<div id="info" style="position: absolute; top: 8px; left: 20px; width: 250px; background-color: white; padding: 5px;">
+  <p id="i_date"> Displaying <span>2019-06-07</span> </p>
+  <p id="i_time"> Time at: <span>7am</span> </p>
+  <p id="i_key"> Appt red, Vol grey, Amb green </p>
+  <p id="i_help" title = "S/W for North / South
+A/D for West / East
+F/R for Zoom in / Zoom out
+P/L for Forward / Backward in time
+B   for reset"> (hover for instructions) </p>
+</div>
+<script>
+// data
+
+// must match the day!
+var seven_am = new Date("2019-06-07 07:00:00 UTC");
+
+var patient_info = [
+    {"lat":"54.968","lng":"-1.548","beg":"2019-06-07 15:00:00 UTC","end":"2019-06-07 15:30:00 UTC","put":"2019-06-07T14:27:25.246Z","dot":"2019-06-07T15:42:34.753Z"},
+    {"lat":"55.186","lng":"-1.509","beg":"2019-06-07 10:45:00 UTC","end":"2019-06-07 14:45:00 UTC","put":"2019-06-07T09:36:44.850Z","dot":"2019-06-07T15:33:15.149Z"},
+    {"lat":"54.783","lng":"-1.354","beg":"2019-06-07 13:40:00 UTC","end":"2019-06-07 14:10:00 UTC","put":"2019-06-07T11:18:28.491Z","dot":"2019-06-07T15:41:31.508Z"},
+    {"lat":"54.979","lng":"-1.651","beg":"2019-06-07 14:00:00 UTC","end":"2019-06-07 14:30:00 UTC","put":"2019-06-07T13:28:18.893Z","dot":"2019-06-07T12:56:41.106Z"},
+    {"lat":"54.952","lng":"-1.602","beg":"2019-06-07 10:00:00 UTC","end":"2019-06-07 15:30:00 UTC","put":"2019-06-07T08:58:25.110Z","dot":"2019-06-07T16:11:34.889Z"},
+    {"lat":"54.932","lng":"-1.601","beg":"2019-06-07 15:30:00 UTC","end":"2019-06-07 16:30:00 UTC","put":"2019-06-07T14:24:21.688Z","dot":"2019-06-07T17:15:38.311Z"},
+    {"lat":"55.008","lng":"-1.470","beg":"2019-06-07 12:00:00 UTC","end":"2019-06-07 12:30:00 UTC","put":"2019-06-07T11:24:11.395Z","dot":"2019-06-07T12:45:48.604Z"},
+    {"lat":"54.900","lng":"-1.449","beg":"2019-06-07 10:30:00 UTC","end":"2019-06-07 11:00:00 UTC","put":"2019-06-07T08:51:08.593Z","dot":"2019-06-07T12:03:51.406Z"},
+    {"lat":"54.884","lng":"-1.422","beg":"2019-06-07 12:00:00 UTC","end":"2019-06-07 12:30:00 UTC","put":"2019-06-07T10:40:03.536Z","dot":"2019-06-07T13:29:56.463Z"},
+    {"lat":"54.966","lng":"-1.525","beg":"2019-06-07 14:15:00 UTC","end":"2019-06-07 14:45:00 UTC","put":"2019-06-07T13:09:21.563Z","dot":"2019-06-07T15:30:38.436Z"},
+    {"lat":"54.767","lng":"-1.471","beg":"2019-06-07 11:40:00 UTC","end":"2019-06-07 12:10:00 UTC","put":"2019-06-07T10:03:19.075Z","dot":"2019-06-07T12:56:40.924Z"},
+    {"lat":"54.926","lng":"-1.375","beg":"2019-06-07 10:40:00 UTC","end":"2019-06-07 11:10:00 UTC","put":"2019-06-07T09:07:27.483Z","dot":"2019-06-07T12:17:32.516Z"},
+    {"lat":"54.842","lng":"-1.511","beg":"2019-06-07 15:00:00 UTC","end":"2019-06-07 15:30:00 UTC","put":"2019-06-07T13:41:36.715Z","dot":"2019-06-07T16:28:23.284Z"},
+    {"lat":"54.929","lng":"-1.450","beg":"2019-06-07 11:15:00 UTC","end":"2019-06-07 11:45:00 UTC","put":"2019-06-07T10:05:14.362Z","dot":"2019-06-07T12:34:45.637Z"},
+    {"lat":"54.873","lng":"-1.843","beg":"2019-06-07 15:45:00 UTC","end":"2019-06-07 16:15:00 UTC","put":"2019-06-07T14:15:39.116Z","dot":"2019-06-07T17:24:20.883Z"},
+    {"lat":"54.936","lng":"-1.679","beg":"2019-06-07 10:10:00 UTC","end":"2019-06-07 10:40:00 UTC","put":"2019-06-07T08:55:59.652Z","dot":"2019-06-07T11:34:00.347Z"},
+    {"lat":"54.966","lng":"-1.519","beg":"2019-06-07 15:30:00 UTC","end":"2019-06-07 16:00:00 UTC","put":"2019-06-07T14:23:42.243Z","dot":"2019-06-07T16:46:17.756Z"},
+    {"lat":"55.412","lng":"-1.720","beg":"2019-06-07 14:00:00 UTC","end":"2019-06-07 14:30:00 UTC","put":"2019-06-07T12:49:56.797Z","dot":"2019-06-07T16:30:46.615Z"},
+    {"lat":"54.974","lng":"-2.007","beg":"2019-06-07 14:00:00 UTC","end":"2019-06-07 14:30:00 UTC","put":"2019-06-07T12:31:55.158Z","dot":"2019-06-07T15:38:04.841Z"},
+    {"lat":"54.936","lng":"-1.387","beg":"2019-06-07 10:30:00 UTC","end":"2019-06-07 11:00:00 UTC","put":"2019-06-07T09:10:54.938Z","dot":"2019-06-07T12:14:05.061Z"},
+    {"lat":"55.047","lng":"-1.630","beg":"2019-06-07 13:30:00 UTC","end":"2019-06-07 14:00:00 UTC","put":"2019-06-07T12:56:23.385Z","dot":"2019-06-07T14:13:36.614Z"},
+    {"lat":"54.925","lng":"-1.390","beg":"2019-06-07 14:20:00 UTC","end":"2019-06-07 14:50:00 UTC","put":"2019-06-07T12:28:47.284Z","dot":"2019-06-07T15:46:12.715Z"},
+    {"lat":"54.908","lng":"-1.575","beg":"2019-06-07 12:30:00 UTC","end":"2019-06-07 13:00:00 UTC","put":"2019-06-07T11:18:16.896Z","dot":"2019-06-07T14:36:43.103Z"},
+    {"lat":"55.080","lng":"-1.570","beg":"2019-06-07 12:20:00 UTC","end":"2019-06-07 12:50:00 UTC","put":"2019-06-07T11:41:05.664Z","dot":"2019-06-07T13:33:54.335Z"},
+    {"lat":"54.891","lng":"-1.515","beg":"2019-06-07 13:10:00 UTC","end":"2019-06-07 13:40:00 UTC","put":"2019-06-07T12:00:06.641Z","dot":"2019-06-07T14:59:53.358Z"},
+    {"lat":"54.999","lng":"-1.506","beg":"2019-06-07 09:30:00 UTC","end":"2019-06-07 10:00:00 UTC","put":"2019-06-07T08:58:51.270Z","dot":"2019-06-07T10:11:08.729Z"},
+    {"lat":"54.875","lng":"-1.364","beg":"2019-06-07 17:00:00 UTC","end":"2019-06-07 17:30:00 UTC","put":"2019-06-07T15:32:57.154Z","dot":"2019-06-07T18:37:02.845Z"},
+    {"lat":"54.910","lng":"-1.367","beg":"2019-06-07 09:30:00 UTC","end":"2019-06-07 10:00:00 UTC","put":"2019-06-07T07:49:15.555Z","dot":"2019-06-07T11:00:44.444Z"},
+    {"lat":"54.942","lng":"-1.555","beg":"2019-06-07 09:15:00 UTC","end":"2019-06-07 10:15:00 UTC","put":"2019-06-07T08:07:53.148Z","dot":"2019-06-07T11:02:06.851Z"},
+    {"lat":"55.124","lng":"-1.506","beg":"2019-06-07 09:15:00 UTC","end":"2019-06-07 14:45:00 UTC","put":"2019-06-07T10:19:21.005Z","dot":"2019-06-07T16:20:03.958Z"},
+    {"lat":"55.167","lng":"-1.692","beg":"2019-06-07 12:45:00 UTC","end":"2019-06-07 13:15:00 UTC","put":"2019-06-07T11:08:32.301Z","dot":"2019-06-07T14:06:27.698Z"},
+    {"lat":"55.329","lng":"-1.574","beg":"2019-06-07 10:45:00 UTC","end":"2019-06-07 11:15:00 UTC","put":"2019-06-07T08:59:26.132Z","dot":"2019-06-07T12:10:55.598Z"},
+    {"lat":"54.984","lng":"-1.422","beg":"2019-06-07 09:10:00 UTC","end":"2019-06-07 09:40:00 UTC","put":"2019-06-07T07:05:21.047Z","dot":"2019-06-07T11:04:38.952Z"},
+    {"lat":"55.004","lng":"-1.692","beg":"2019-06-07 14:00:00 UTC","end":"2019-06-07 16:00:00 UTC","put":"2019-06-07T13:18:16.132Z","dot":"2019-06-07T16:12:09.545Z"},
+    {"lat":"54.854","lng":"-1.750","beg":"2019-06-07 11:15:00 UTC","end":"2019-06-07 11:45:00 UTC","put":"2019-06-07T09:51:20.522Z","dot":"2019-06-07T12:48:39.477Z"},
+    {"lat":"54.983","lng":"-1.698","beg":"2019-06-07 14:45:00 UTC","end":"2019-06-07 15:15:00 UTC","put":"2019-06-07T14:08:30.286Z","dot":"2019-06-07T15:31:29.713Z"},
+    {"lat":"54.833","lng":"-1.370","beg":"2019-06-07 10:00:00 UTC","end":"2019-06-07 12:00:00 UTC","put":"2019-06-07T08:54:10.873Z","dot":"2019-06-07T13:15:07.811Z"},
+    {"lat":"54.881","lng":"-1.568","beg":"2019-06-07 13:15:00 UTC","end":"2019-06-07 13:45:00 UTC","put":"2019-06-07T11:11:53.191Z","dot":"2019-06-07T14:43:06.808Z"},
+    {"lat":"54.932","lng":"-1.579","beg":"2019-06-07 10:15:00 UTC","end":"2019-06-07 10:45:00 UTC","put":"2019-06-07T08:51:31.901Z","dot":"2019-06-07T11:31:13.214Z"},
+    {"lat":"54.725","lng":"-1.515","beg":"2019-06-07 09:00:00 UTC","end":"2019-06-07 09:30:00 UTC","put":"2019-06-07T07:51:30.660Z","dot":"2019-06-07T10:18:29.339Z"},
+    {"lat":"55.041","lng":"-1.444","beg":"2019-06-07 12:40:00 UTC","end":"2019-06-07 13:10:00 UTC","put":"2019-06-07T11:54:17.415Z","dot":"2019-06-07T13:37:19.793Z"},
+    {"lat":"55.023","lng":"-1.470","beg":"2019-06-07 13:45:00 UTC","end":"2019-06-07 17:45:00 UTC","put":"2019-06-07T13:05:58.195Z","dot":"2019-06-07T18:04:01.804Z"},
+    {"lat":"54.924","lng":"-1.378","beg":"2019-06-07 13:45:00 UTC","end":"2019-06-07 14:15:00 UTC","put":"2019-06-07T12:27:15.899Z","dot":"2019-06-07T15:47:44.100Z"},
+    {"lat":"54.820","lng":"-1.386","beg":"2019-06-07 08:50:00 UTC","end":"2019-06-07 09:20:00 UTC","put":"2019-06-07T07:43:45.282Z","dot":"2019-06-07T10:26:14.717Z"},
+    {"lat":"54.882","lng":"-1.515","beg":"2019-06-07 11:10:00 UTC","end":"2019-06-07 11:40:00 UTC","put":"2019-06-07T09:34:08.847Z","dot":"2019-06-07T13:25:51.152Z"},
+    {"lat":"54.973","lng":"-1.438","beg":"2019-06-07 11:00:00 UTC","end":"2019-06-07 17:00:00 UTC","put":"2019-06-07T08:53:13.906Z","dot":"2019-06-07T17:54:24.490Z"},
+    {"lat":"54.902","lng":"-1.376","beg":"2019-06-07 09:10:00 UTC","end":"2019-06-07 09:40:00 UTC","put":"2019-06-07T07:46:29.267Z","dot":"2019-06-07T11:03:30.732Z"},
+    {"lat":"55.011","lng":"-1.644","beg":"2019-06-07 13:15:00 UTC","end":"2019-06-07 13:45:00 UTC","put":"2019-06-07T12:47:04.864Z","dot":"2019-06-07T13:52:55.135Z"},
+    {"lat":"54.927","lng":"-1.411","beg":"2019-06-07 10:15:00 UTC","end":"2019-06-07 10:45:00 UTC","put":"2019-06-07T09:01:16.718Z","dot":"2019-06-07T11:53:43.281Z"},
+    {"lat":"54.953","lng":"-1.370","beg":"2019-06-07 10:45:00 UTC","end":"2019-06-07 11:15:00 UTC","put":"2019-06-07T09:16:32.293Z","dot":"2019-06-07T12:08:27.706Z"},
+    {"lat":"54.998","lng":"-1.422","beg":"2019-06-07 12:00:00 UTC","end":"2019-06-07 12:30:00 UTC","put":"2019-06-07T10:48:49.198Z","dot":"2019-06-07T13:21:10.801Z"},
+    {"lat":"54.976","lng":"-1.562","beg":"2019-06-07 11:20:00 UTC","end":"2019-06-07 11:50:00 UTC","put":"2019-06-07T10:50:53.954Z","dot":"2019-06-07T12:09:06.045Z"},
+    {"lat":"54.796","lng":"-1.591","beg":"2019-06-07 09:00:00 UTC","end":"2019-06-07 09:30:00 UTC","put":"2019-06-07T07:27:34.373Z","dot":"2019-06-07T10:42:25.626Z"}];
+                           
+var ambulances = [
+    {"anm":"Baltic Breeze","lat":"55.012","lng":"-1.675",},
+    {"anm":"Busee Bee","lat":"55.097","lng":"-1.579",},
+    {"anm":"Byker Bluebell","lat":"54.996","lng":"-1.728",},
+    {"anm":"Darras Delight","lat":"55.166","lng":"-1.594",},
+    {"anm":"Dunston Diamond","lat":"54.924","lng":"-1.378",},
+    {"anm":"Ellingham Angel","lat":"55.007","lng":"-1.503",},
+    {"anm":"Goldheart","lat":"54.983","lng":"-1.554",},
+    {"anm":"Gosforth Guardian","lat":"54.998","lng":"-1.621",},
+    {"anm":"Happy-Ho-Ho","lat":"55.012","lng":"-1.675",},
+    {"anm":"Happy-O-Saurus","lat":"54.933","lng":"-1.786",},
+    {"anm":"Hedgehog Express","lat":"55.001","lng":"-1.726",},
+    {"anm":"Lights The Way","lat":"55.008","lng":"-1.439",},
+    {"anm":"One Wheel Closer","lat":55.0151,"lng":-1.6201,"drv":null},
+    {"anm":"Polly Pebble","lat":"55.171","lng":"-1.577",},
+    {"anm":"Puffin Express","lat":"54.933","lng":"-1.786",},
+    {"anm":"Reach For The Stars","lat":"54.903","lng":"-1.550",},
+    {"anm":"Ryhope You Feel Better","lat":"55.024","lng":"-1.631",},
+    {"anm":"Seaton Valley Saviour","lat":"54.837","lng":"-1.497",},
+    {"anm":"Sparkle","lat":"55.036","lng":"-1.773",},
+    {"anm":"Sparkling Hearts","lat":55.0151,"lng":-1.6201,"drv":null},
+    {"anm":"Speedy Squirrel","lat":"54.908","lng":"-1.445",},
+    {"anm":"Starlight","lat":"54.924","lng":"-1.599",},
+    {"anm":"Station Star","lat":"55.029","lng":"-1.632",},
+    {"anm":"Sunshine","lat":"54.996","lng":"-1.611",},
+    {"anm":"Sunshine. (Tow Bar)","lat":"55.099","lng":"-1.589",},
+    {"anm":"Toner Tornado","lat":"55.008","lng":"-1.650",},
+    {"anm":"Twinkle Toes","lat":"55.124","lng":"-1.514",},
+    {"anm":"(Z) Shimmering Hearts (Fast-Track)","lat":55.0151,"lng":-1.6201,"drv":null},
+    {"anm":"(Z) Swansfield Pick You Up (Fast-Track)","lat":55.0151,"lng":-1.6201,"drv":null}];
+
+var volunteers = [
+    {"lat":"54.908","lng":"-1.445","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.122","lng":"-1.551","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.055","lng":"-1.669","drv":true,"cmp":true,"obs":true},
+    {"lat":"54.992","lng":"-1.707","drv":true,"cmp":false,"obs":true},
+    {"lat":"55.005","lng":"-1.531","drv":true,"cmp":false,"obs":true},
+    {"lat":"55.005","lng":"-1.527","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.063","lng":"-1.510","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.049","lng":"-1.737","drv":true,"cmp":false,"obs":true},
+    {"lat":"55.213","lng":"-1.543","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.020","lng":"-1.434","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.028","lng":"-1.765","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.039","lng":"-1.475","drv":true,"cmp":true,"obs":true},
+    {"lat":"54.928","lng":"-1.779","drv":false,"cmp":true,"obs":true},
+    {"lat":"54.964","lng":"-1.563","drv":true,"cmp":false,"obs":true},
+    {"lat":"54.998","lng":"-1.564","drv":true,"cmp":false,"obs":true},
+    {"lat":"55.141","lng":"-1.573","drv":false,"cmp":true,"obs":true},
+    {"lat":"54.902","lng":"-1.519","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.025","lng":"-1.636","drv":true,"cmp":false,"obs":true},
+    {"lat":"54.997","lng":"-1.710","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.061","lng":"-1.553","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.005","lng":"-1.527","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.021","lng":"-1.645","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.058","lng":"-1.619","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.036","lng":"-1.554","drv":true,"cmp":true,"obs":true},
+    {"lat":"54.876","lng":"-1.651","drv":false,"cmp":true,"obs":true},
+    {"lat":"54.972","lng":"-1.746","drv":true,"cmp":true,"obs":true},
+    {"lat":"54.836","lng":"-1.454","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.029","lng":"-1.632","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.020","lng":"-1.569","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.045","lng":"-1.480","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.050","lng":"-1.628","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.005","lng":"-1.548","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.019","lng":"-1.432","drv":false,"cmp":true,"obs":true},
+    {"lat":"54.933","lng":"-1.786","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.027","lng":"-1.628","drv":false,"cmp":true,"obs":true},
+    {"lat":"54.920","lng":"-1.742","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.021","lng":"-1.645","drv":true,"cmp":false,"obs":true},
+    {"lat":"54.949","lng":"-1.568","drv":false,"cmp":true,"obs":true},
+    {"lat":"54.975","lng":"-1.417","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.065","lng":"-1.503","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.152","lng":"-1.690","drv":false,"cmp":true,"obs":true},
+    {"lat":"54.921","lng":"-1.571","drv":true,"cmp":true,"obs":true},
+    {"lat":"54.953","lng":"-1.733","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.179","lng":"-1.519","drv":true,"cmp":false,"obs":true},
+    {"lat":"54.885","lng":"-1.614","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.05","lng":"-1.624","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.007","lng":"-1.503","drv":true,"cmp":true,"obs":true},
+    {"lat":"54.987","lng":"-1.605","drv":false,"cmp":true,"obs":true},
+    {"lat":"54.996","lng":"-1.611","drv":true,"cmp":true,"obs":true},
+    {"lat":"54.918","lng":"-1.538","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.152","lng":"-1.690","drv":true,"cmp":false,"obs":true},
+    {"lat":"54.902","lng":"-1.519","drv":true,"cmp":false,"obs":true},
+    {"lat":"55.008","lng":"-1.650","drv":true,"cmp":true,"obs":true},
+    {"lat":"55.018","lng":"-1.566","drv":false,"cmp":true,"obs":true},
+    {"lat":"55.131","lng":"-1.631","drv":true,"cmp":false,"obs":true},
+    {"lat":"55.003","lng":"-1.648","drv":true,"cmp":false,"obs":true}];
+
+var alloc_links = [];
+
+</script>
+
+    <script>
+// utils
+Array.prototype.pluck = function(fld) { return this.map(function(i) { return i[fld] }) };
+Array.prototype.compact = function() { return this.reduce(function(v,x) { return x == null ? v : v.concat(x) }, []) };
+
+var add_hours = function(d,h) {
+  return new Date(d.valueOf() + h * 3600000)
+};
+
+var pt = function(x,y,z) { return new THREE.Vector3(x,y,z) };
+var xy = function(x,y)   { return new THREE.Vector2(x,y)   };
+
+
+// freeman, assume one for now
+var hospital = pt(-1.593, 55.003, 0);
+
+    </script>
+
+    <script>
+// fairly generic
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+      }
+
+      function onDocumentMouseMove( event ) {
+// check this
+        event.preventDefault();
+        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+      }
+
+    </script>
+
+    <script>
+
+// you can scale the routes collection to compress the appts display, so really no need for tweaks here. 
+// scaling to 0-1 = 10 hours? 
+var scale_time = function(t) {
+  return (t - seven_am) / 3600000 / 10;
+};
+
+// scale route point by its time -- move to time section? 
+var pos_at = function(pos, t) {
+  return pt(pos.x, pos.y, scale_time(t));
+};
+
+// not used?
+var flat_pos = function(pos,_t) { return pt(pos.x, pos.y, 0); };
+
+
+
+
+var load_map = function(scene, dot_lists) {
+// plane for "now"
+// see http://stackoverflow.com/a/37325781 - didn't work 
+// see http://stackoverflow.com/a/24088628
+  var thing = {};
+  thing.plane = null;
+
+  thing.chg_height = function(units) { 
+    thing.plane.position.z  += units * 0.1; 
+    dot_lists.forEach(dots => dots.position.z   += units * 0.1);
+
+    var d = new Date(seven_am)
+    var t = new Date(d.setMinutes(d.getMinutes() + thing.plane.position.z * (10 * 60)));
+    document.querySelector('#info p#i_time span').innerText = t.toLocaleTimeString();
+  }
+
+  thing.fan = -1;
+
+  thing.actions = function(keycode) {
+	  switch ( keycode ) {
+	    case 76: /*L*/ thing.chg_height(0 - 1); break;
+	    case 80: /*P*/ thing.chg_height(0 + 1); break;
+	    case 79: /*O*/ alloc_lines.visible = !alloc_lines.visible; break;
+	    case 73: /*I*/ thing.fan += 1; 
+                           if (thing.fan > alloc_groups.children.length) { thing.fan = 0; } 
+                           console.log(thing.fan, alloc_links[thing.fan], alloc_links[thing.fan].all);
+                           alloc_groups.children.forEach(c => c.visible = false);
+                           alloc_groups.children[thing.fan].visible = true;
+                           break;
+          }
+  };
+
+  var map_loader = new THREE.TextureLoader();
+  map_loader.load(
+  // not the real map...
+  'https://daab-pam-production.herokuapp.com/assets/daab-icon-8b8a6d63656397f81b8df02b540fa9747c862e76bfb018d752cc8cf76251b1ba.png'
+  , function (tx) {
+    var floorMaterial = new THREE.MeshBasicMaterial( { map: tx, side: THREE.DoubleSide, transparent: true, opacity: 0.6 } );
+    var p_geometry = new THREE.PlaneGeometry( 2,2, 8,8 );
+    var p_plane = new THREE.Mesh( p_geometry, floorMaterial );
+    thing.plane = p_plane;
+
+    // TODO - take account of latitude
+    // square image 1024x1024 loaded into 2x2 
+    // estimate 147px == 0.287 long, and 225px == 0.439 lat
+    // hosp = (573 / 1024 * 2, (1024 - 466) / 1024 * 2 in image
+    // img width = [1024.0 / 147 * 0.243, 1024.0 / 225 * 0.236] = 1.693, 1.074
+
+    p_plane.position.x = -2.63 + 1 - 0.1;
+    p_plane.position.y = 54.47 + 0.5 - 0.025;
+    p_plane.position.z = 0 - 0.01;
+
+    // want 2x2 mapped onto real size
+    p_plane.scale.x = 2.0 / 2; 
+    p_plane.scale.y = 1.074 / 2;
+
+    // p_plane.rotation.z = 0 - Math.PI / 2;
+    // p_plane.rotation.z = 0 - Math.PI / 2;
+
+    // DO NOT ADD YET
+    // scene.add( p_plane );
+  });
+
+  return thing;
+}
+
+var load_routes = function(scene, pos_at) {
+  var routes = new THREE.Object3D();  
+  scene.add( routes );
+
+  patient_info.forEach(function (p) {
+
+// TODO FIX FOR LAT
+// NB why not nav on a huge sphere? since that is what it really is...
+
+          var pxy = xy(Number(p.lng), Number(p.lat)); 
+
+          var endpts = new THREE.Geometry();
+          endpts.vertices.push(pos_at(pxy, new Date(p.put)));
+          endpts.vertices.push(pos_at(pxy, new Date(p.dot)));
+
+          var line = new THREE.Line(endpts);
+          line.material.linewidth = 3;
+          routes.add(line);
+          var line_col = line.material.color;
+
+          var endpts = new THREE.Geometry();
+          endpts.vertices.push(pos_at(pxy, new Date(p.beg)));
+          endpts.vertices.push(pos_at(pxy, new Date(p.end)));
+
+          var bar = new THREE.Line(endpts);
+          bar.material.linewidth = 7;
+          bar.material.color = line_col;
+          routes.add(bar);
+  });
+  return routes;
+}
+
+
+var orbit_camera = function() {
+  var thing = {};
+  
+  // 30 = field of view? 
+  thing.camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
+
+  // "up" is Z axis now
+  thing.camera.up.x = 0;
+  thing.camera.up.y = 0;
+  thing.camera.up.z = 1;
+  
+
+  thing.radius = 0.5;
+  thing.theta  = 0.9 * Math.PI ; // downwards, and slight turn
+  thing.height = 0.5;
+  thing.target = 0.2;
+
+  thing.chg_height = function(units) { thing.height += units * 0.1 };
+  thing.chg_radius = function(units) { thing.radius += units * 0.1; if (thing.radius < 0) { thing.radius = 0.00 } };
+  thing.chg_theta  = function(units) { thing.theta  += units * 0.1 };
+  thing.chg_target = function(units) { thing.target += units * 0.1; if (thing.target < 0) { thing.target = 0.01 } };
+
+  thing.update = function(hospital, plane) {
+    var p = thing.camera.position;
+    p.x = hospital.x + thing.radius * Math.sin( thing.theta );
+    p.y = hospital.y + thing.radius * Math.cos( thing.theta );
+    p.z = plane.position.z + thing.height;
+    thing.camera.lookAt(pt(hospital.x, hospital.y, plane.position.z + thing.height * thing.target));
+  };
+
+  thing.actions = function(keycode) {
+	  switch ( keycode ) {
+	    case 38: /*up*/
+	    case 87: /*W*/ thing.chg_radius(0 - 1); break;
+	    case 40: /*down*/
+	    case 83: /*S*/ thing.chg_radius(0 + 1); break;
+
+            case 37: /*left*/
+            case 65: /*A*/ thing.chg_theta(0 - 1); break;
+	    case 39: /*right*/
+	    case 68: /*D*/ thing.chg_theta(0 + 1); break;
+
+	    case 82: /*R*/ thing.chg_height(0 + 1); break;
+	    case 70: /*F*/ thing.chg_height(0 - 1); break;
+
+	    case 84: /*T*/ thing.chg_target(0 + 1); break;
+	    case 71: /*G*/ thing.chg_target(0 - 1); break;
+	  }
+  };
+
+  return thing;
+}
+
+var grid_camera = function() {
+  var thing = {};
+  
+  // 30 = field of view? 
+  thing.camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
+
+  // "up" is Z axis now
+  thing.camera.up.x = 0;
+  thing.camera.up.y = 0;
+  thing.camera.up.z = 1;
+  
+  thing.posx = hospital.x;
+  thing.posy = hospital.y;
+  thing.height = 0.5;
+
+  thing.chg_height = function(units) { thing.height += units * 0.1 };
+  thing.chg_posx   = function(units) { thing.posx   += units * 0.1 };
+  thing.chg_posy   = function(units) { thing.posy   += units * 0.1 };
+  thing.chg_target = function(units) { thing.target += units * 0.1; if (thing.target < 0) { thing.target = 0.01 } };
+
+  thing.update = function(hospital, plane) {
+    var p = thing.camera.position;
+    p.x = thing.posx;
+    p.y = thing.posy;
+    p.z = plane.position.z + thing.height;
+    thing.camera.lookAt(pt(p.x, p.y, plane.position.z + thing.target));
+  };
+
+  thing.actions = function(keycode) {
+	  switch ( keycode ) {
+	    case 38: /*up*/
+	    case 87: /*W*/ thing.chg_posy(0 - 1); break;
+	    case 40: /*down*/
+	    case 83: /*S*/ thing.chg_posy(0 + 1); break;
+
+            case 37: /*left*/
+            case 65: /*A*/ thing.chg_posx(0 - 1); break;
+	    case 39: /*right*/
+	    case 68: /*D*/ thing.chg_posx(0 + 1); break;
+
+	    case 82: /*R*/ thing.chg_height(0 + 1); break;
+	    case 70: /*F*/ thing.chg_height(0 - 1); break;
+
+	    case 84: /*T*/ thing.chg_target(0 + 1); break;
+	    case 71: /*G*/ thing.chg_target(0 - 1); break;
+	  }
+  };
+
+  return thing;
+}
+
+
+
+// GLOBALS
+      var q = {}; // tmp vals
+
+      var container;
+      var scene, renderer;
+
+      var main_camera = grid_camera();
+
+      var mouse = new THREE.Vector2();
+      var currentIntersected;
+
+      var routes, staff;
+      var p_plane;
+
+
+      init();
+      animate();
+
+      function init() {
+        scene = new THREE.Scene();
+
+// thicker or clearer lines on axes?
+	var axes = new THREE.AxisHelper(2);
+	axes.position.x = hospital.x;
+	axes.position.y = hospital.y;
+	axes.position.z = hospital.z;
+	scene.add(axes);
+
+
+        routes = load_routes(scene, pos_at);
+
+// staff (driver) dots
+        staff_dots = new THREE.Object3D();  // as a sub-assembly, treated as a group
+        scene.add(staff_dots);
+
+        var v_geometry = new THREE.SphereGeometry( 0.005 ); 
+        var v_material = new THREE.MeshBasicMaterial( { color: 0x333333 } ); // local
+        volunteers.filter((x) => { return x.drv  }).forEach(function (v) {
+          var vs = new THREE.Mesh( v_geometry, v_material );
+          vs.position.x = v.lng;
+          vs.position.y = v.lat;
+          vs.position.z = 0 - 0.01;
+          staff_dots.add(vs);
+        });
+
+// ambulance position dots
+        ambulance_dots = new THREE.Object3D();  // as a sub-assembly, treated as a group
+        scene.add(ambulance_dots);
+
+        var l_geometry = new THREE.SphereGeometry( 0.005 ); 
+        var l_material = new THREE.MeshBasicMaterial( { color: 0x33aa33 } ); // local
+        ambulances.forEach(function (a) {
+          var vs = new THREE.Mesh( l_geometry, l_material );
+          vs.position.x = a.lng;
+          vs.position.y = a.lat;
+          vs.position.z = 0 - 0.01;
+          ambulance_dots.add(vs);
+        });
+
+// patient dots
+        appointment_dots = new THREE.Object3D();  // as a sub-assembly, treated as a group
+        scene.add(appointment_dots);
+
+        var a_geometry = new THREE.SphereGeometry( 0.005 ); 
+        var a_material = new THREE.MeshBasicMaterial( { color: 0xaa3333 } ); // local
+        patient_info.forEach(function (p) {
+          var vs = new THREE.Mesh( a_geometry, a_material );
+          vs.position.x = p.lng;
+          vs.position.y = p.lat;
+          vs.position.z = 0 + 0.01;
+          appointment_dots.add(vs);
+        });
+
+// alloc first/last patients
+        alloc_lines = new THREE.Object3D();  // as a sub-assembly, treated as a group
+        alloc_lines.visible = false;
+        scene.add(alloc_lines);
+
+        alloc_links.forEach(function (l) {
+          var endpts = new THREE.Geometry();
+          endpts.vertices.push(pt(l.lng, l.lat, 0.01));
+          endpts.vertices.push(pt(l.fst.lng, l.fst.lat, 0.01));
+          // endpts.vertices.push(pt(l.lst.lng, l.lst.lat, 0.01));
+
+          var line = new THREE.Line(endpts);
+          line.material.linewidth = 3;
+          line.material.color = {r:0, g:0, b: 0}
+          alloc_lines.add(line);
+        });
+
+// alloc groups
+        alloc_groups = new THREE.Object3D();  // as a sub-assembly, treated as a group
+        alloc_groups.visible = true
+        scene.add(alloc_groups);
+
+        alloc_links.forEach(function (l) {
+          var fan = new THREE.Object3D();
+          alloc_groups.add(fan)
+          fan.visible = false;
+
+          l.all.forEach(function (p) {
+            var endpts = new THREE.Geometry();
+            endpts.vertices.push(pt(l.lng, l.lat, 0.01));
+            endpts.vertices.push(pt(p.lng, p.lat, 0.01));
+
+            var line = new THREE.Line(endpts);
+            line.material.linewidth = 3;
+            line.material.color = {r:0, g:0, b: 0}
+            fan.add(line);
+          });
+        });
+
+// ----------------------------------------
+
+// ties the dots to the map plane, maybe crudely
+        p_plane = load_map(scene, [staff_dots, appointment_dots, ambulance_dots]) 
+
+// ----------------------------------------
+// the screen aka canvas
+
+        renderer = new THREE.WebGLRenderer( { antialias: true } );
+        renderer.setClearColor( 0xf0f0f0 );
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        container = document.createElement( 'div' );
+        document.body.appendChild( container );
+        container.appendChild(renderer.domElement);
+
+        document.addEventListener( 'mousemove', onDocumentMouseMove, false );   // document? 
+          window.addEventListener( 'resize', onWindowResize, false );
+
+        // do this by composition? this set is for 
+        window.addEventListener( 'keydown', function ( event ) {
+	  //event.preventDefault(); ???
+          main_camera.actions(event.keyCode);
+          p_plane.actions(event.keyCode);
+          if (event.keyCode == 66 /* B */) {
+            main_camera = grid_camera(); // just replace the global... 
+          }
+	}, false);
+      }
+
+
+      //
+
+      function animate() {
+        requestAnimationFrame( animate );
+        render();
+      }
+
+      function render() {
+        main_camera.update(hospital, p_plane.plane);
+        renderer.render( scene, main_camera.camera );
+      }
+
+    </script>
+
+  </body>
+</html>

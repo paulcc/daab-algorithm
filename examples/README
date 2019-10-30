@@ -1,0 +1,63 @@
+h1. example.html
+
+this shows a plot of a typical day, with personal details suitably removed and obscured.
+
+it's extracted from a hacky 3D experiment to help visualise the problem 
+
+there's still enough to see the relative positions of patients, volunteers and ambulances
+
+there's also an attempt to represent relative journey and appointment times
+
+raw data can also be extracted from the code. 
+
+
+
+h2. Details
+
+* red dots show location of patients
+* grey/black dots show available volunteers 
+* green dots are ambulances - usually at the position of the previous driver
+
+One immediate point to note is that the kinds of dot cluster differently, eg 
+patients and volunteers tend not to be in the same areas, with corresponding 
+effect on driving time. 
+
+
+The funny lines pointing at the dots represent journey time. The thicker part
+represents time at hospital, and the thinner bits before and after represent
+estimated travel time. The length of the line represents the time that the
+patient will be away from home, if transported in a single trip (ie. not shared).
+
+
+h2. Underlying data
+
+Three JSON arrays contain the key data.
+
+* "ambulances" = list of ambulance positions (previous driver) with the ambulance names
+* "volunteers" = list of volunters, with their position and indication of whether they drive or not. 
+* "patient_info" = list of appointments, each record showing rough position of patient plus four times
+** "beg" and "end" are the nominal hospital appointment times
+** "put" = pick up time, estimated time by which patient should be collected to arrive in good time for the appointment
+** "dot" = drop off time, predicted time for return home
+** the estimated times are crude, roughly taking into account distance, river crossing, and likely speed
+
+
+h2. "3D Animation"
+
+Some buttons allow movement of a camera positioned over the plot. Hover 
+over "hover for instructions" at top left for hints. 
+
+The forward/backward option is to help visualise what the demand is, at
+various times through the day. The idea is that the plane of the dots 
+moves up or down in time relative to the journey lines, and where this plane 
+intersects those lines indicates what's happening on those journeys at
+that time. It may or may not be helpful. 
+
+The plot can also be superimposed on a map of the Tyne & Wear region. I've 
+not got a suitable image for this that I can share, so it's left for the 
+reader to supply (or imagine). 
+
+There are other experimental implementations of a camera in the code, but
+I won't try to explain those. 
+
+
