@@ -1,0 +1,17 @@
+Here's a sketch of what we have
+
+Firstly, a gui for editing a day's journeys, allowing a schedule to built from scratch or tweaked. Charity has been using this for a few years now, and it's a massive saving on previous work, even with limited automation in place. 
+
+Secondly, an algorithm for finding a "reasonable" schedule of patient journeys plus volunteer allocations. Sometimes bits of it are good enough to remain in the final schedule, or provide good hints on how to proceed. 
+
+
+The current algorithm covers a few details:
+* build a journey structure for a single patient, estimating pick up and drop off times according to distance
+* look at reasonable pairings of such structures, so that the pick ups and drop offs are compatible (not much extra time or distance), and don't involve too much extra waiting time at hostpital
+* simple packing of distinct pairings into a set of routes, assigned to potential ambulances
+* picking "close" volunteers for staffing the ambulance, then assigned to a physical nearby ambulance
+
+The above uses a number of informal heuristics, but we've not found a balance which produces consistently "good" solutions (as defined by the human planners). Part of the problem is that we've not spent much time developing the heuristics to reflect much of the "domain knowledge" (or been able to extract much, due to other pressures). 
+
+Another issue is how to balance global measures against local measures. Eg is it better to have most drivers travel a near-optimal distance, or to have most drive an optimal distance but a few drive a clearly sub-optimal distance. Simple measures don't always translate into the perceptions and preferences of the people involved.
+
