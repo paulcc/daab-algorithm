@@ -1,0 +1,10 @@
+We have a simple implementation of search, but not quite happy with the output and part of the allocation is still done by hand. 
+
+I'm interested in
+* hearing about similar work & solutions
+* suggestions for approaches
+* chatting about problem details
+
+Please post questions/ideas as issues on github, so we can all see the discussions.
+
+Thanks!
